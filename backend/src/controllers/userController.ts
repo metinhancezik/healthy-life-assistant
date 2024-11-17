@@ -25,3 +25,35 @@ export const getUserProfile = async (
     res.status(500).json({ message: 'Sunucu hatası' });
   }
 };
+
+//To do
+
+//User için daha fazla metot eklenebilir;
+
+// export const updateUserProfile = async (req: Request, res: Response) => { ... }
+// export const uploadProfileImage = async (req: Request, res: Response) => { ... }
+
+
+//Meal controllerı ekleyip;
+// export const addMeal = async (req: Request, res: Response) => { ... }
+// export const getMeals = async (req: Request, res: Response) => { ... }
+// export const updateMeal = async (req: Request, res: Response) => { ... }
+// export const deleteMeal = async (req: Request, res: Response) => { ... }
+
+
+//activity controllerı ekleyip;
+// export const addActivity = async (req: Request, res: Response) => { ... }
+// export const getActivities = async (req: Request, res: Response) => { ... }
+// export const updateActivity = async (req: Request, res: Response) => { ... }
+// export const deleteActivity = async (req: Request, res: Response) => { ... }
+
+
+//Belki hataları yönetmek için bir yapı oluşturulabilir;
+//Mesela, errorHandler.ts diye bir dosya oluşturup içerisine fonksiyonumuzu tanımlayabiliriz.
+// export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+//   console.error(err.stack);
+//   res.status(500).json({ message: 'Bir hata oluştu' });
+// };
+
+
+
