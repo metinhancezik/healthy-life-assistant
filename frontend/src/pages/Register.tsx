@@ -7,19 +7,85 @@ import {
   Typography,
   Box,
   Link,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import api from '../utils/axios';
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Kayıt bilgileri:', formData);
+    
+    // Form validasyonu
+    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
+      setSnackbar({
+        open: true,
+        message: 'Lütfen tüm alanları doldurun',
+        severity: 'error'
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setSnackbar({
+        open: true,
+        message: 'Şifreler eşleşmiyor',
+        severity: 'error'
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await api.post('/auth/register', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+
+      setSnackbar({
+        open: true,
+        message: 'Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...',
+        severity: 'success'
+      });
+
+      // 2 saniye sonra login sayfasına yönlendir
+      setTimeout(() => {
+        navigate('/login', { 
+          state: { message: 'Kayıt başarılı! Lütfen giriş yapın.' }
+        });
+      }, 2000);
+
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Kayıt olurken bir hata oluştu',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -38,6 +104,9 @@ const Register = () => {
               label="Kullanıcı Adı"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              disabled={loading}
+              error={!formData.username && formData.username !== ''}
+              helperText={!formData.username && formData.username !== '' ? 'Kullanıcı adı gerekli' : ''}
             />
             
             <TextField
@@ -48,6 +117,9 @@ const Register = () => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={loading}
+              error={!formData.email && formData.email !== ''}
+              helperText={!formData.email && formData.email !== '' ? 'E-posta gerekli' : ''}
             />
             
             <TextField
@@ -58,6 +130,9 @@ const Register = () => {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              disabled={loading}
+              error={!formData.password && formData.password !== ''}
+              helperText={!formData.password && formData.password !== '' ? 'Şifre gerekli' : ''}
             />
             
             <TextField
@@ -68,6 +143,9 @@ const Register = () => {
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              disabled={loading}
+              error={formData.password !== formData.confirmPassword && formData.confirmPassword !== ''}
+              helperText={formData.password !== formData.confirmPassword && formData.confirmPassword !== '' ? 'Şifreler eşleşmiyor' : ''}
             />
             
             <Button
@@ -75,8 +153,13 @@ const Register = () => {
               fullWidth
               variant="contained"
               sx={{ mt: 3 }}
+              disabled={loading}
             >
-              Kayıt Ol
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Kayıt Ol'
+              )}
             </Button>
 
             <Box sx={{ mt: 2, textAlign: 'center' }}>
@@ -87,6 +170,22 @@ const Register = () => {
           </form>
         </Paper>
       </Box>
+
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
